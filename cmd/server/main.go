@@ -12,10 +12,16 @@ import (
 )
 
 var quotes = []string{
-	"Quote 1",
-	"Quote 2",
-	"Quote 3",
-	// Add more quotes as needed
+	"Do not take life too seriously. " +
+		"You will never get out of it alive",
+
+	"The best way out is always through",
+
+	"Knowledge speaks, but wisdom listens",
+
+	"Always do what you are afraid to do",
+
+	"Life is what happens to us while we are making other plans",
 }
 
 func handleConnection(conn net.Conn) {
