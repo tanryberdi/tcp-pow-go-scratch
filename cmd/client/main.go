@@ -47,9 +47,11 @@ func main() {
 	}
 
 	// Send the response to the server
+	//nolint:errcheck
 	conn.Write([]byte(response + "\n"))
 
 	// Delete the challenge after using it
+	//nolint:ineffassign
 	challenge = ""
 
 	// Read and print the server's quote

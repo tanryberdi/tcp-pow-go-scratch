@@ -30,6 +30,7 @@ var quotes = []string{
 	"Life is what happens to us while we are making other plans",
 }
 
+//nolint:errcheck
 func handleConnection(conn net.Conn, conf config.Config) {
 	defer conn.Close()
 
@@ -66,6 +67,7 @@ func main() {
 		return
 	}
 
+	//nolint:staticcheck
 	rand.Seed(time.Now().UnixNano())
 
 	// Create a TCP server
@@ -80,7 +82,7 @@ func main() {
 	}()
 
 	// Create a channel to receive OS signals
-	c := make(chan os.Signal)
+	c := make(chan os.Signal, 1)
 
 	// Relay interrupt signals to the channel
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
