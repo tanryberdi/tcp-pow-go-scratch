@@ -12,6 +12,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"tcp-pow-go-scratch/config"
 )
 
 var quotes = []string{
@@ -27,7 +29,7 @@ var quotes = []string{
 	"Life is what happens to us while we are making other plans",
 }
 
-func handleConnection(conn net.Conn) {
+func handleConnection(conn net.Conn, conf config.Config) {
 	defer conn.Close()
 
 	// Generate a random challenge
@@ -43,13 +45,20 @@ func handleConnection(conn net.Conn) {
 	// Check if the client's response is a valid proof of work
 	response := strings.TrimSpace(string(buf[:n]))
 	hash := sha256.Sum256([]byte(challenge + response))
-	if strings.HasPrefix(hex.EncodeToString(hash[:]), "0000") {
+	if strings.HasPrefix(hex.EncodeToString(hash[:]), strings.Repeat("0", conf.HashcashZerosCount)) {
 		// If the proof of work is valid, send a random quote
 		conn.Write([]byte(quotes[rand.Intn(len(quotes))]))
 	}
 }
 
 func main() {
+	// Load the configuration
+	conf, err := config.LoadConfig("config/config.json")
+	if err != nil {
+		fmt.Println("error loading config:", err)
+		return
+	}
+
 	rand.Seed(time.Now().UnixNano())
 
 	// Create a TCP server
@@ -59,7 +68,7 @@ func main() {
 	go func() {
 		for {
 			conn, _ := ln.Accept()
-			go handleConnection(conn)
+			go handleConnection(conn, conf)
 		}
 	}()
 

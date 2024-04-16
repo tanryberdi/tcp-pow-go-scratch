@@ -10,9 +10,18 @@ import (
 	"math/rand"
 	"net"
 	"strings"
+
+	"tcp-pow-go-scratch/config"
 )
 
 func main() {
+	// Load the configuration
+	config, err := config.LoadConfig("config/config.json")
+	if err != nil {
+		log.Fatal("error loading config:", err)
+		return
+	}
+
 	// Connect to the server
 	conn, _ := net.Dial("tcp", "localhost:8080")
 	defer conn.Close()
@@ -26,7 +35,7 @@ func main() {
 	for {
 		response = fmt.Sprintf("%x", rand.Int63())
 		hash := sha256.Sum256([]byte(challenge + response))
-		if strings.HasPrefix(hex.EncodeToString(hash[:]), "0000") {
+		if strings.HasPrefix(hex.EncodeToString(hash[:]), strings.Repeat("0", config.HashcashZerosCount)) {
 			break
 		}
 	}
