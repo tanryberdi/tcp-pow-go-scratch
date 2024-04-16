@@ -34,6 +34,9 @@ func main() {
 	// Send the response to the server
 	conn.Write([]byte(response + "\n"))
 
+	// Delete the challenge after using it
+	challenge = ""
+
 	// Read and print the server's quote
 	quote, _ := bufio.NewReader(conn).ReadString('\n')
 	log.Println(quote)
