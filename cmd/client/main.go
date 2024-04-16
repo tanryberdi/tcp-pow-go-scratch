@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"net"
 	"strings"
+	"time"
 
 	"tcp-pow-go-scratch/config"
 )
@@ -32,11 +33,16 @@ func main() {
 
 	// Find a number that, when hashed with the challenge, results in a hash with 4 leading zeros
 	var response string
-	for {
+	start := time.Now()
+	for i := 0; i < config.HashcashMaxIterations; i++ {
 		response = fmt.Sprintf("%x", rand.Int63())
 		hash := sha256.Sum256([]byte(challenge + response))
 		if strings.HasPrefix(hex.EncodeToString(hash[:]), strings.Repeat("0", config.HashcashZerosCount)) {
 			break
+		}
+
+		if time.Since(start) > time.Duration(config.HashcashDuration)*time.Second {
+			log.Fatal("Failed to find a valid proof of work within the specified the time limit")
 		}
 	}
 

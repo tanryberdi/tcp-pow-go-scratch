@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"math/rand"
 	"net"
 	"os"
@@ -40,7 +41,13 @@ func handleConnection(conn net.Conn, conf config.Config) {
 
 	// Wait for the client's response
 	buf := make([]byte, 1024)
-	n, _ := conn.Read(buf)
+	conn.SetReadDeadline(time.Now().Add(time.Duration(conf.HashcashDuration) * time.Second))
+
+	n, err := conn.Read(buf)
+	if err != nil {
+		log.Println("Failed to receive a valid proof of work within the specified time limit")
+		return
+	}
 
 	// Check if the client's response is a valid proof of work
 	response := strings.TrimSpace(string(buf[:n]))
