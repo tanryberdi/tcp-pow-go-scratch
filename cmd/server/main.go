@@ -7,7 +7,10 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -51,11 +54,28 @@ func main() {
 
 	// Create a TCP server
 	ln, _ := net.Listen("tcp", ":8080")
-	defer ln.Close()
 
-	// Handle incoming connections
-	for {
-		conn, _ := ln.Accept()
-		go handleConnection(conn)
-	}
+	// Handle incoming connections in a separate goroutine
+	go func() {
+		for {
+			conn, _ := ln.Accept()
+			go handleConnection(conn)
+		}
+	}()
+
+	// Create a channel to receive OS signals
+	c := make(chan os.Signal)
+
+	// Relay interrupt signals to the channel
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	// Start a goroutine that listens on the signal channel and gracefully shuts down the server
+	go func() {
+		<-c
+		ln.Close()
+		os.Exit(0)
+	}()
+
+	// Keep the main function alive indefinitely
+	select {}
 }
